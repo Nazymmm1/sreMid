@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bloggie - Home</title>
+    <link rel="icon" type="image/x-icon" href="favicon.jpg">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="header-container">
+            <h1><a href="index.html" class="logo">BLOGGIE</a></h1>
+            <div class="header-right">
+                <nav id="navbar">
+            </div>
+        </div>
+    </header>
+
+    <div class="hero-section">
+        <div class="container">
+            <h2>Welcome to Bloggie</h2>
+            <p>Discover amazing stories from our community</p>
+            <div class="hero-actions">
+                <a href="search.html" class="btn btn-primary">🔍 Search Posts</a>
+                <a href="create-post.html" class="btn btn-secondary" id="createPostBtn">✍️ Create Post</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Posts List -->
+        <div class="posts-section">
+            <div class="section-header">
+                <h2>Recent Posts</h2>
+                <a href="search.html" class="view-all-link">View All & Search →</a>
+            </div>
+            <div id="postsList" class="posts-grid">
+                <div class="loading">Loading posts...</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Messages -->
+    <div id="toastContainer"></div>
+
+    <script src="main.js"></script>
+</body>
+</html>

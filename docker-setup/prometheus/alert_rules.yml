@@ -1,0 +1,121 @@
+# Prometheus Alert Rules for Blog Application
+groups:
+  - name: blog_slo_alerts
+    interval: 30s
+    rules:
+      # CRITICAL: High Error Rate (>5%)
+      - alert: HighErrorRate
+        expr: |
+          (
+            rate(http_request_duration_seconds_count{status=~"5.."}[5m]) 
+            / 
+            rate(http_request_duration_seconds_count[5m])
+          ) > 0.05
+        for: 2m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 5%)"
+
+      # WARNING: Elevated Error Rate (>1%)
+      - alert: ElevatedErrorRate
+        expr: |
+          (
+            rate(http_request_duration_seconds_count{status=~"5.."}[5m]) 
+            / 
+            rate(http_request_duration_seconds_count[5m])
+          ) > 0.01
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Elevated error rate detected"
+          description: "Error rate is {{ $value | humanizePercentage }} (threshold: 1%)"
+
+      # CRITICAL: High Latency (P95 > 500ms)
+      - alert: HighLatency
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 0.5
+        for: 3m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "High request latency detected"
+          description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 500ms)"
+
+      # WARNING: Elevated Latency (P95 > 300ms)
+      - alert: ElevatedLatency
+        expr: |
+          histogram_quantile(0.95, 
+            rate(http_request_duration_seconds_bucket[5m])
+          ) > 0.3
+        for: 5m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Elevated request latency detected"
+          description: "P95 latency is {{ $value | humanizeDuration }} (threshold: 300ms)"
+
+      # CRITICAL: Backend Service Down
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: backend
+        annotations:
+          summary: "Backend service is down"
+          description: "Backend service has been down for more than 1 minute"
+
+      # WARNING: High CPU Usage
+      - alert: HighCPUUsage
+        expr: |
+          100 - (avg by (instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High CPU usage detected"
+          description: "CPU usage is {{ $value | humanize }}% (threshold: 80%)"
+
+      # WARNING: High Memory Usage
+      - alert: HighMemoryUsage
+        expr: |
+          (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: warning
+          component: system
+        annotations:
+          summary: "High memory usage detected"
+          description: "Memory usage is {{ $value | humanize }}% (threshold: 85%)"
+
+      # CRITICAL: MongoDB Connection Issues
+      - alert: MongoDBConnectionFailed
+        expr: mongodb_connections_current == 0
+        for: 2m
+        labels:
+          severity: critical
+          component: database
+        annotations:
+          summary: "MongoDB has no active connections"
+          description: "MongoDB appears to be unreachable"
+
+      # WARNING: Low Request Rate (Potential Issue)
+      - alert: LowRequestRate
+        expr: rate(http_request_duration_seconds_count[5m]) < 0.1
+        for: 10m
+        labels:
+          severity: warning
+          component: backend
+        annotations:
+          summary: "Very low request rate detected"
+          description: "Request rate is {{ $value }} req/s (might indicate an issue)"
