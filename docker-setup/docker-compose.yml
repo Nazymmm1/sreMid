@@ -19,8 +19,8 @@ services:
   # Backend (Node.js + Express)
   backend:
     build:
-      context: ./src
-      dockerfile: ../docker-setup/backend/Dockerfile
+      context: ..
+      dockerfile: docker-setup/backend/Dockerfile
     container_name: blog_backend
     restart: always
     ports:
@@ -37,21 +37,20 @@ services:
     networks:
       - blog_network
 
-  # Frontend (Nginx)
+# Frontend (Nginx)
   frontend:
-    build:
-      context: ./front_end
-      dockerfile: ../docker-setup/frontend/Dockerfile
+    image: nginx:alpine
     container_name: blog_frontend
     restart: always
     ports:
       - "3000:80"
+    volumes:
+      - ../front_end:/usr/share/nginx/html:ro
     depends_on:
       - backend
     networks:
       - blog_network
-
-  # Prometheus - Metrics Collection
+ # Prometheus - Metrics Collection
   prometheus:
     image: prom/prometheus:latest
     container_name: blog_prometheus
@@ -109,24 +108,6 @@ services:
     networks:
       - blog_network
 
-  # cAdvisor - Container Metrics
-  cadvisor:
-    image: gcr.io/cadvisor/cadvisor:latest
-    container_name: blog_cadvisor
-    restart: always
-    ports:
-      - "8080:8080"
-    volumes:
-      - /:/rootfs:ro
-      - /var/run:/var/run:ro
-      - /sys:/sys:ro
-      - /var/lib/docker/:/var/lib/docker:ro
-      - /dev/disk/:/dev/disk:ro
-    privileged: true
-    devices:
-      - /dev/kmsg
-    networks:
-      - blog_network
 
 networks:
   blog_network:
