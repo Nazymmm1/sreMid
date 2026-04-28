@@ -1,7 +1,7 @@
 // Same as original profile.js but with image support in loadUserPosts
 
 // API Configuration
-const API_URL = 'http://192.168.0.22:5000';
+const API_URL = '/api'
 
 // State
 let currentUser = null;
@@ -161,7 +161,7 @@ async function loadUserPosts() {
             <div class="user-post-card" onclick="goToPost('${post._id}')">
                 ${post.image ? `
                     <div class="user-post-image">
-                        <img src="${API_URL}${post.image}" alt="${escapeHtml(post.title)}" 
+                        <img src="${post.image}" alt="${escapeHtml(post.title)}" 
                              onerror="this.parentElement.style.display='none'"
                              style="width: 100%; height: 150px; object-fit: cover; border-radius: 8px 8px 0 0; margin-bottom: 1rem;">
                     </div>

@@ -18,7 +18,7 @@ app.get('/metrics', async (req, res) => {
 dotenv.config();
 
 app.use(cors({
-  origin: ['http://192.168.0.22:3000', 'http://localhost:3000'],
+  origin: ['http://192.168.56.10:3000', 'http://localhost:3000'],
   credentials: true
 }));
 

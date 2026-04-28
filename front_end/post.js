@@ -1,5 +1,5 @@
-// API Configuration
-const API_URL = 'http://192.168.0.22:5000';
+// API Configurationvof post js
+const API_URL = '/api'
 
 // State
 let currentUser = null;
@@ -119,7 +119,7 @@ function renderPost() {
         const imageContainer = document.getElementById('postImageContainer');
         const imageElement = document.getElementById('postImage');
         
-        imageElement.src = `${API_URL}${currentPost.image}`;
+        imageElement.src = `${currentPost.image}`;
         imageElement.alt = currentPost.title;
         imageElement.onerror = function() {
             console.error('Failed to load image');
@@ -440,7 +440,7 @@ function editPost() {
     const currentPostImage = document.getElementById('currentPostImage');
     
     if (currentPost.image) {
-        currentPostImage.src = `${API_URL}${currentPost.image}`;
+        currentPostImage.src = `${currentPost.image}`;
         currentImageSection.style.display = 'block';
     } else {
         currentImageSection.style.display = 'none';

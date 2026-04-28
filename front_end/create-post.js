@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://192.168.0.22:5000';
+const API_URL = '/api'
 
 // State
 let currentUser = null;

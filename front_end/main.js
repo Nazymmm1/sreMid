@@ -1,5 +1,5 @@
 // API Configuration
-const API_URL = 'http://192.168.0.22:5000';
+const API_URL = '/api'
 
 // State
 let currentUser = null;
@@ -70,7 +70,7 @@ async function loadRecentPosts() {
     console.log('Loading posts from:', `/posts`);
     
     try {
-        const response = await fetch(`/posts`);
+        const response = await fetch(`${API_URL}/posts`);
         console.log('Posts response status:', response.status);
         
         const posts = await response.json();
