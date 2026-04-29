@@ -1,24 +1,23 @@
-# Prometheus Alert Rules for Blog Application
 groups:
   - name: blog_slo_alerts
     interval: 30s
     rules:
-      - alert: MongoDBConnectionFailed
-        expr: mongodb_connections_current == 0
-        for: 2m
+      - alert: BackendDown
+        expr: up{job="backend"} == 0
+        for: 1m
         labels:
           severity: critical
-          component: database
+          component: backend
         annotations:
-          summary: "MongoDB has no active connections"
-          description: "MongoDB appears to be unreachable"
+          summary: "Backend service is down"
+          description: "Backend is unreachable - possible database misconfiguration"
 
       - alert: LowRequestRate
         expr: rate(http_request_duration_seconds_count[5m]) < 0.1
-        for: 10m
+        for: 2m
         labels:
           severity: warning
           component: backend
         annotations:
           summary: "Very low request rate detected"
-          description: "Request rate is {{ $value }} req/s (might indicate an issue)"
+          description: "Request rate is {{ $value }} req/s"
