@@ -1,0 +1,143 @@
+version: '3.8'
+
+services:
+  backend:
+    image: docker-setup_backend
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      MONGODB_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 5000
+    networks:
+      - blog_network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  auth-service:
+    image: docker-setup_auth-service
+    ports:
+      - "5001:5001"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 5001
+    networks:
+      - blog_network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  post-service:
+    image: docker-setup_post-service
+    ports:
+      - "5002:5002"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5002
+    networks:
+      - blog_network
+    deploy:
+      replicas: 2
+      restart_policy:
+        condition: on-failure
+
+  user-service:
+    image: docker-setup_user-service
+    ports:
+      - "5003:5003"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5003
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  analytics-service:
+    image: docker-setup_analytics-service
+    ports:
+      - "5004:5004"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5004
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  search-service:
+    image: docker-setup_search-service
+    ports:
+      - "5005:5005"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5005
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  notification-service:
+    image: docker-setup_notification-service
+    ports:
+      - "5006:5006"
+    environment:
+      PORT: 5006
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  api-gateway:
+    image: docker-setup_api-gateway
+    ports:
+      - "8080:8080"
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
+    networks:
+      - blog_network
+    deploy:
+      replicas: 1
+
+networks:
+  blog_network:
+    driver: overlay
+
+volumes:
+  mongodb_data:
+  prometheus_data:
+  grafana_data:

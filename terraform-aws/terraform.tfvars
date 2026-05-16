@@ -1,0 +1,6 @@
+aws_region       = "us-east-1"
+instance_type    = "t3.micro"
+allowed_ssh_cidr = "0.0.0.0/0"
+project_name     = "SRE-EndTerm"
+mongo_uri        = "mongodb+srv://nazym:nika123@myfavcluster.4s63clz.mongodb.net/mydb?retryWrites=true&w=majority"
+jwt_secret       = "jwt-secret"

@@ -94,8 +94,8 @@ resource "docker_container" "grafana" {
   image = "grafana/grafana:latest"
 
   env = [
-    "GF_SECURITY_ADMIN_USER=${var.mongodb_username}",
-    "GF_SECURITY_ADMIN_PASSWORD=${var.mongodb_password}"
+    "GF_SECURITY_ADMIN_USER=${var.grafana_username}",
+    "GF_SECURITY_ADMIN_PASSWORD=${var.grafana_password}"
   ]
 
   ports {

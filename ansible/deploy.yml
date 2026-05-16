@@ -1,0 +1,76 @@
+---
+- name: Deploy Blog Microservices
+  hosts: local
+  become: yes
+
+  tasks:
+    - name: Install Docker dependencies
+      apt:
+        name:
+          - docker.io
+          - docker-compose
+          - curl
+        state: present
+        update_cache: yes
+
+    - name: Ensure Docker is running
+      service:
+        name: docker
+        state: started
+        enabled: yes
+
+    - name: Check Docker is running
+      command: docker info
+      register: docker_info
+
+    - name: Print Docker status
+      debug:
+        msg: "Docker is running successfully"
+      when: docker_info.rc == 0
+
+    - name: Validate environment file exists
+      stat:
+        path: /home/Kurmanbayeve/mid_SRE/.env
+      register: env_file
+
+    - name: Fail if env file missing
+      fail:
+        msg: ".env file not found! Run validate-config.sh first"
+      when: not env_file.stat.exists
+
+    - name: Start all containers
+      command: docker-compose up -d
+      args:
+        chdir: /home/Kurmanbayeve/mid_SRE/docker-setup
+
+    - name: Wait for services to start
+      pause:
+        seconds: 30
+
+    - name: Check backend health
+      uri:
+        url: http://localhost:5000/health
+        return_content: yes
+      register: health_check
+
+    - name: Print health status
+      debug:
+        msg: "Backend health: {{ health_check.content }}"
+
+    - name: Check all microservices health
+      uri:
+        url: "http://localhost:{{ item }}/health"
+        return_content: yes
+      loop:
+        - 5001
+        - 5002
+        - 5003
+        - 5004
+        - 5005
+        - 5006
+      register: microservice_health
+
+    - name: Print microservices status
+      debug:
+        msg: "Service on port {{ item.item }} is healthy"
+      loop: "{{ microservice_health.results }}"

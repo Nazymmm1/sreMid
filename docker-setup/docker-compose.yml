@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database
   mongodb:
     image: mongo:6.0
     container_name: blog_mongodb
@@ -16,13 +15,12 @@ services:
     networks:
       - blog_network
     healthcheck:
-       test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-       interval: 30s
-       timeout: 10s
-       retries: 3
-       start_period: 40s
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
-  # Backend (Node.js + Express)
   backend:
     build:
       context: ..
@@ -48,16 +46,7 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
 
-# Frontend (Nginx)
   frontend:
     image: nginx:alpine
     container_name: blog_frontend
@@ -76,16 +65,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
-      
- # Prometheus - Metrics Collection
+
   prometheus:
     image: prom/prometheus:latest
     container_name: blog_prometheus
@@ -109,16 +89,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
 
-  # Grafana - Visualization & Dashboards
   grafana:
     image: grafana/grafana:latest
     container_name: blog_grafana
@@ -142,7 +113,6 @@ services:
       timeout: 10s
       retries: 3
 
-  # Node Exporter - System Metrics
   node-exporter:
     image: prom/node-exporter:latest
     container_name: blog_node_exporter
@@ -161,6 +131,148 @@ services:
     networks:
       - blog_network
 
+  auth-service:
+    build:
+      context: ../services/auth-service
+      dockerfile: Dockerfile
+    container_name: blog_auth_service
+    restart: unless-stopped
+    ports:
+      - "5001:5001"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      JWT_SECRET: ${JWT_SECRET}
+      PORT: 5001
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  post-service:
+    build:
+      context: ../services/post-service
+      dockerfile: Dockerfile
+    container_name: blog_post_service
+    restart: unless-stopped
+    ports:
+      - "5002:5002"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5002
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  user-service:
+    build:
+      context: ../services/user-service
+      dockerfile: Dockerfile
+    container_name: blog_user_service
+    restart: unless-stopped
+    ports:
+      - "5003:5003"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5003
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  analytics-service:
+    build:
+      context: ../services/analytics-service
+      dockerfile: Dockerfile
+    container_name: blog_analytics_service
+    restart: unless-stopped
+    ports:
+      - "5004:5004"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5004
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  search-service:
+    build:
+      context: ../services/search-service
+      dockerfile: Dockerfile
+    container_name: blog_search_service
+    restart: unless-stopped
+    ports:
+      - "5005:5005"
+    environment:
+      MONGO_URI: ${MONGO_URI}
+      PORT: 5005
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5005/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  notification-service:
+    build:
+      context: ../services/notification-service
+      dockerfile: Dockerfile
+    container_name: blog_notification_service
+    restart: unless-stopped
+    ports:
+      - "5006:5006"
+    environment:
+      PORT: 5006
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5006/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  api-gateway:
+    build:
+      context: ../services/api-gateway
+      dockerfile: Dockerfile
+    container_name: blog_api_gateway
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - auth-service
+      - post-service
+      - user-service
+      - analytics-service
+      - search-service
+      - notification-service
+    networks:
+      - blog_network
+    healthcheck:
+      test: ["CMD", "wget", "--tries=1", "--spider", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
 networks:
   blog_network:
@@ -170,4 +282,3 @@ volumes:
   mongodb_data:
   prometheus_data:
   grafana_data:
-
