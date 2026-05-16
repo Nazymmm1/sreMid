@@ -1,0 +1,4 @@
+.terraform/
+terraform-aws/.terraform/
+awscliv2.zip
+aws/
